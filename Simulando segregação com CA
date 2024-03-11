@@ -1,0 +1,89 @@
+int[][] grid;
+int n = 100;
+
+void setup(){
+  size(600,600);
+  frameRate(5); // Reduzido para visualização mais clara
+  grid = criaGrid();
+}
+
+int[][] criaGrid(){
+  int[][] m = new int[n][n];
+  
+  for(int i = 0; i < n; i++){
+    for(int j = 0; j < n; j++){
+      m[i][j] = (random(3) > 1) ? 1 : (random(3) > 1 ? 2 : 0); // Aleatoriamente atribui valores 0, 1 ou 2
+    }
+  }
+  return m;
+}
+
+void mostraGrid(){
+  float l = width/(float)n;
+  float h = height/(float)n;
+  
+  for(int i = 0; i < n; i++){
+    for(int j = 0; j < n; j++){
+      if (grid[i][j] == 0) {
+        fill(255); // Espaço vazio
+      } else if (grid[i][j] == 1) {
+        fill(0, 255, 0); // Verde
+      } else {
+        fill(0, 0, 255); // Azul
+      }
+      rect(j*l, i*h, l, h);
+    }
+  }
+}
+
+int countSameNeighbors(int i, int j) {
+  int count = 0;
+  
+  for(int ki = -1; ki < 2; ki++){
+    for(int kj = -1; kj < 2; kj++){
+      int ni = (n+i+ki)%n;
+      int nj = (n+j+kj)%n;
+      
+      if(grid[ni][nj] == grid[i][j]) {
+        count++;
+      }
+    }
+  }
+  
+  return count - 1; // Exclui a célula central
+}
+
+void atualizaGrid(){
+  int[][] novoGrid = new int[n][n];
+  
+  for(int i = 0; i < n; i++){
+    for(int j = 0; j < n; j++){
+      if (grid[i][j] != 0) {
+        int sameNeighbors = countSameNeighbors(i, j);
+        float satisfaction = float(sameNeighbors) / 8.0;
+        
+        if (satisfaction < 0.5) {
+          // Encontra um espaço vazio aleatório
+          int x, y;
+          do {
+            x = int(random(n));
+            y = int(random(n));
+          } while (grid[x][y] != 0);
+          
+          // Move o indivíduo para o espaço vazio
+          novoGrid[x][y] = grid[i][j];
+          novoGrid[i][j] = 0;
+        } else {
+          novoGrid[i][j] = grid[i][j]; // Mantém o indivíduo no mesmo lugar
+        }
+      }
+    }
+  }
+  
+  grid = novoGrid;
+}
+
+void draw(){
+  mostraGrid();
+  atualizaGrid();
+}
